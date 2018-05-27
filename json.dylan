@@ -1,4 +1,4 @@
-Module: %json
+Module: json
 Copyright: Original Code is Copyright (c) 2011 Dylan Hackers
            All rights reserved.
 License: See License.txt in this distribution for details.
@@ -52,7 +52,7 @@ define method encode-json (stream :: <stream>, object :: <collection>)
     encode-json(stream, o);
   end for;
   write(stream, "]");
-end;
+end method encode-json;
 
 define method encode-json (stream :: <stream>, object :: <table>)
   write(stream, "{");
@@ -66,4 +66,4 @@ define method encode-json (stream :: <stream>, object :: <table>)
     encode-json(stream, value);
   end for;
   write(stream, "}");
-end;
+end method encode-json;

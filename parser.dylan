@@ -1,4 +1,4 @@
-Module: %json
+Module: json
 Synopsis: Ad-hoc recursive descent parser for JSON -- http://www.json.org/
 Author: Carl Gay
 Copyright: Copyright (c) 2012 Dylan Hackers.  All rights reserved.

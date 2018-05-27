@@ -1,11 +1,11 @@
-Module: json-test-suite
+Module: json
 Synopsis: JSON test suite
 Author: Carl Gay
 Copyright: Copyright (c) 2012 Dylan Hackers.  All rights reserved.
 License: See License.txt in this distribution for details.
 
 
-// TODO(cgay): intentional parse errors.
+// TODO(cgay): intentional parse errors. 
 
 define macro make-object
     { make-object(?rest:*) }
@@ -92,7 +92,7 @@ end suite json-test-suite;
 
 define function main ()
   let filename = locator-name(as(<file-locator>, application-name()));
-  if (split(filename, ".")[0] = "json-test-suite")
+  if (split(filename, ".")[0] = "json")
     run-test-application(json-test-suite);
   end;
 end function main;
