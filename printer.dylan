@@ -5,20 +5,52 @@ License: See License.txt in this distribution for details.
 
 define open generic encode-json (stream :: <stream>, object :: <object>);
 
-define constant $escapes = 
-  vector(pair("\\", "\\\\"),
-         pair("\"", "\\\""),
-         pair("\n", "\\n"),
-         pair("\t", "\\t"));
-
-define method encode-json (stream :: <stream>, object :: <string>)
-  write(stream, "\"");
-  for (escape in $escapes)
-    object := replace-substrings(object, head(escape), tail(escape));
+define method encode-json (stream :: <stream>, string :: <string>)
+  write-element(stream, '"');
+  let zero :: <integer> = as(<integer>, '0');
+  let a :: <integer> = as(<integer>, 'a') - 10;
+  local
+    method write-hex-digit (code :: <integer>)
+      write-element(stream, as(<character>,
+                               if (code < 10) zero + code else a + code end));
+    end,
+    method write-unicode-escape (code :: <integer>)
+      write(stream, "\\u");
+      write-hex-digit(ash(logand(code, #xf000), -12));
+      write-hex-digit(ash(logand(code, #x0f00), -8));
+      write-hex-digit(ash(logand(code, #x00f0), -4));
+      write-hex-digit(logand(code, #x000f));
+    end;
+  for (char in string)
+    let code = as(<integer>, char);
+    case
+      code <= #x1f =>
+        let escape-char = select (char)
+                            '\b' => 'b';
+                            '\f' => 'f';
+                            '\n' => 'n';
+                            '\r' => 'r';
+                            '\t' => 't';
+                            otherwise => #f;
+                          end;
+        if (escape-char)
+          write-element(stream, '\\');
+          write-element(stream, escape-char);
+        else
+          write-unicode-escape(code);
+        end;
+      char == '"' =>
+        write(stream, "\\\"");
+      char == '\\' =>
+        write(stream, "\\\\");
+      code < 127 =>             // omits DEL
+        write-element(stream, char);
+      otherwise =>
+        write-unicode-escape(code);
+    end case;
   end for;
-  write(stream, object);
-  write(stream, "\"");
-end;
+  write-element(stream, '"');
+end method;
 
 define method encode-json (stream :: <stream>, object :: <integer>)
   write(stream, integer-to-string(object));
