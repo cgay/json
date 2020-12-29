@@ -1,30 +1,31 @@
 Module: %json
 Synopsis: Ad-hoc recursive descent parser for JSON -- http://www.json.org/
-Copyright: Copyright (c) 2012 Dylan Hackers.  All rights reserved.
+Copyright: Copyright (c) 2020 Dylan Hackers.  All rights reserved.
 License:   See LICENSE.txt in this distribution for details.
 
-
-// Notes:
-// * Objects are parsed as <string-table>s by default.
-// * The parser is strict by default.  If ``strict?: #f`` is used then
-//   - '#' is allowed as a comment character
-//   - "\<c>" is equivalent to "<c>", where <c> is not a defined escape character
-//   - trailing commas are allowed in arrays and objects.
-
 // TODO(cgay):
+// * The JSON spec has evolved. Review https://tools.ietf.org/html/rfc8259
+//   for where we fall short.
 // * parse-number
 
 
-// Things that terminate numbers, booleans, and null.  Note that ':' is not
-// included since it may only follow a double quote character.
-define constant $token-terminators :: <string> = " \t\n\r}],";
-
-
-
-/// Synopsis: Parse json formatted text from the given 'source'.
-///           This is the main user-visible entry point for parsing.
-///           table-class, if provided, should be a subclass of <table>
-///           to use when creating a JSON "object".
+// Parse json formatted text from the given source.
+//
+// Parameters:
+//   source: Currently either a stream or a string.
+//   table-class: A subclass of `<table>` to use when creating JSON "objects".
+//     The default is `<string-table>`.
+//   strict?: If true (the default), follow the JSON spec exactly. If false,
+//     - '#' is allowed as a comment character
+//     - "\<c>" is equivalent to "<c>", where <c> is not a defined escape character
+//     - trailing commas are allowed in arrays and objects.
+// Values:
+//   object: Any object that may be encoded in JSON format, such as an integer or
+//     string. JSON "objects" are encoded as `<string-table>` by default.
+// Signals:
+//   <json-parse-error>
+//
+// TODO: strict? should be two different keywords: allow-commas? and allow-comments?
 define open generic parse-json
     (source :: <object>, #key strict? :: <boolean>, table-class = <string-table>)
  => (json :: <object>);
@@ -49,6 +50,10 @@ define method parse-json
                  table-class: table-class | <string-table>))
 end;
 
+// Things that terminate numbers, booleans, and null.  Note that ':' is not
+// included since it may only follow a double quote character.
+define constant $token-terminators :: <string> = " \t\n\r}],";
+
 
 /// Synopsis: parse and return any valid json entity.  An object, array,
 ///           integer, float, string, boolean, or null.  This is used for
@@ -58,24 +63,24 @@ define method parse-any
     (p :: <json-parser>) => (object :: <object>)
   eat-whitespace-and-comments(p);
   let char = p.next;
-  select (char by member?)
-    "'\"" =>
+  select (char)
+    '"' =>
       parse-string(p);
-    "{" =>
+    '{' =>
       parse-object(p);
-    "[" =>
+    '[' =>
       parse-array(p);
-    "-0123456789" =>
+    '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' =>
       parse-number(p);
-    "t" =>
+    't' =>
       expect(p, "true");
       expect-token-terminator(p);
       #t;
-    "f" =>
+    'f' =>
       expect(p, "false");
       expect-token-terminator(p);
       #f;
-    "n" =>
+    'n' =>
       expect(p, "null");
       expect-token-terminator(p);
       $null;
@@ -279,10 +284,9 @@ end method parse-number;
 
 define method parse-string
     (p :: <json-parser>) => (string :: <string>)
-  let start-char = p.consume;
-  assert(start-char = '"');
+  assert(p.consume = '"');
   let string = parse-simple-string(p);
-  if (p.next ~= start-char)
+  if (p.next ~= '"')
     parse-error(p, "Unterminated string.");
   end;
   p.consume;
