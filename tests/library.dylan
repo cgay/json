@@ -12,7 +12,7 @@ define library json-test-suite
   use system,
     import: { locators };
   use testworks;
-end;
+end module;
 
 define module json-test-suite
   use common-dylan;
@@ -25,5 +25,6 @@ define module json-test-suite
   use locators,
     import: { <file-locator>,
               locator-name };
+  use streams;
   use testworks;
-end;
+end module;
