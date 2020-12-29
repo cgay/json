@@ -12,6 +12,7 @@ define module json
     encode-json,
     parse-json,
     <json-error>,
+    <json-parse-error>,
     $null;
 end;
 
