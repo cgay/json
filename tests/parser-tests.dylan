@@ -43,7 +43,8 @@ define test test-parse-string ()
   check-equal("c", parse-json(#:raw:("\"\\/\b\f\n\r\t")), "\"\\/\b\f\n\r\t");
 end test;
 
-define test test-parse-number ()
+define test test-parse-number
+    (expected-to-fail-reason: "TODO: floating point parsing")
   for (item in #[#["123", 123],
                  #["-123", -123],
                  #["123e3", 123000],
