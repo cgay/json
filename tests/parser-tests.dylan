@@ -1,6 +1,6 @@
 Module: json-test-suite
 Synopsis: JSON test suite
-Copyright: Copyright (c) 2012 Dylan Hackers.  All rights reserved.
+Copyright: Copyright (c) 2020 Dylan Hackers.  All rights reserved.
 License: See License.txt in this distribution for details.
 
 
@@ -25,7 +25,7 @@ define test test-parse-object ()
               make-object("a" => #t));
   check-condition("Trailing comma is error in strict mode?",
                   <json-error>, parse-json(#:raw:({"a": true,})));
-end test test-parse-object;
+end test;
 
 define test test-parse-array ()
   check-equal("a", parse-json("[]"), #[]);
@@ -35,13 +35,13 @@ define test test-parse-array ()
               vector($null));
   check-condition("Trailing comma is error in strict mode?",
                   <json-error>, parse-json("[null,true,false,]"))
-end test test-parse-array;
+end test;
 
 define test test-parse-string ()
   check-equal("a", parse-json(#:raw:("foo")), "foo");
   check-equal("b", parse-json(#:raw:("foo\nbar")), "foo\nbar");
   check-equal("c", parse-json(#:raw:("\"\\/\b\f\n\r\t")), "\"\\/\b\f\n\r\t");
-end test test-parse-string;
+end test;
 
 define test test-parse-number ()
   for (item in #[#["123", 123],
@@ -62,14 +62,14 @@ define test test-parse-number ()
     check-equal(format-to-string("%s => %s", input, expected),
                 parse-json(input), expected);
   end;
-end test test-parse-number;
+end test;
 
 define test test-parse-constants ()
   check-equal("a", parse-json("null"), $null);
   check-equal("b", parse-json("true"), #t);
   check-equal("c", parse-json("false"), #f);
   check-condition("d", <json-error>, parse-json("null123"));
-end test test-parse-constants;
+end test;
 
 /// Synopsis: Verify that whitespace (including CR, CRLF, and LF) is ignored.
 ///
@@ -77,10 +77,10 @@ define test test-parse-whitespace ()
   let obj = make(<string-table>);
   obj["key"] := 123;
   check-equal("a", parse-json(" {\n\"key\"\r:\r\n123\r }"), obj);
-end test test-parse-whitespace;
+end test;
 
 define test test-table-class ()
   assert-equal(2, size(parse-json(#:raw:({"a": 1, "A": 2}))));
   assert-equal(1, size(parse-json(#:raw:({"a": 1, "A": 2}),
                                   table-class: <istring-table>)));
-end;
+end test;
